@@ -7,8 +7,7 @@
 ## 📌 프로젝트 소개
 **EV Station**은 실시간 전기차 충전소 정보, 예약, 결제, 고장 신고 등  
 전기차 운전자에게 꼭 필요한 기능을 제공하는 **충전소 통합 정보 플랫폼**입니다.  
-STS3 → STS4 기반으로 기술 스택을 안정화하고 Spring, JSP, Oracle DB, MyBatis, Spring Security 등  
-최신 기술과 공공데이터 API 연동으로 실시간 데이터를 제공합니다.
+Spring, JSP, Oracle DB, MyBatis, Spring Security 등 최신 기술과 공공데이터 API 연동으로 실시간 데이터를 제공합니다.
 
 ---
 
@@ -100,7 +99,6 @@ STS3 → STS4 기반으로 기술 스택을 안정화하고 Spring, JSP, Oracle 
 
 ### DevOps & Tools
 - Git / GitHub
-- STS3 → STS4
 - Gradle
 - Postman
 
@@ -177,7 +175,7 @@ Charging_station/
         <b>손봉균 (팀장)</b>
       </a>
       <br>
-      <sub>풀스택 - 로그인, 회원가입, 추천 회원, 결제, 관리자/회원관리, 게시판, 고장신고, 실시간 지도연동</sub>
+      <sub>풀스택 - 로그인, 이메일-아이디&비번찾기, 관리자/고장처리, 공지사항, 고장신고, 혼잡도 예측, 페이징처리</sub>
     </td>
     <!-- 팀원 2 -->
     <td align="center">
@@ -187,7 +185,7 @@ Charging_station/
       <b>이현진</b>
           </a>
       <br>
-      <sub>백엔드 - 마이페이지, 시큐리티, 소셜로그인, 공지 사항, 예약처리/결제 연결</sub>
+      <sub>풀스택 - 회원가입, 마이페이지, 시큐리티, 소셜로그인, 게시판, 예약처리</sub>
     </td>
     <!-- 팀원 3 -->
     <td align="center">
@@ -197,7 +195,7 @@ Charging_station/
       <b>박동영</b>
           </a>
       <br>
-      <sub>백엔드 - 충전소 API·지도연동, 혼잡도 예측, 결제 연동, 이메일 인증</sub>
+      <sub>풀스택 - 토스 결제기능, 지도 클러스터처리, 지도 충전소 외 장소 찾기 </sub>
     </td>
     <!-- 팀원 4 -->
     <td align="center">
@@ -207,7 +205,7 @@ Charging_station/
       <b>정찬호</b>
           </a>
       <br>
-      <sub>백엔드 - 고장신고, 예약/결제, 이미지/지도처리</sub>
+      <sub>풀스택 - 공공데이터 api, 디비삽입, 각종 버그 수정, 지도 클러스터 처리</sub>
     </td>
   </tr>
 </table>
