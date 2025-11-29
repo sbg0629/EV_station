@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.login.dao.MemDAO">
+
+    <resultMap id="memResultMap" type="com.boot.login.dto.MemDTO">
+        <result property="memberId"     column="member_id"/>
+        <result property="name"         column="name"/>
+        <result property="password"     column="password"/>
+        <result property="nickname"     column="nickname"/>
+        <result property="email"        column="email"/>
+        <result property="phoneNumber"  column="phone_number"/>
+        <result property="birthdate"    column="birthdate"/>
+        <result property="joinDate"     column="join_date"/>
+        <result property="adminck"      column="admin_ck"/>
+        <result property="socialType"   column="social_type"/>
+        <result property="socialId"     column="social_id"/>
+    </resultMap>
+
+    <select id="loginYn" parameterType="java.util.HashMap" resultMap="memResultMap">
+        SELECT *
+        FROM member_tb 
+        WHERE member_id = #{MEMBER_ID}
+          AND password = #{PASSWORD}
+    </select>
+    
+    <insert id="write" parameterType="java.util.HashMap">
+        INSERT INTO member_tb (
+            member_id, name, password, nickname, email, 
+            phone_number, birthdate, admin_ck,
+            social_type, social_id  ) VALUES (
+            #{MEMBER_ID}, #{NAME}, #{PASSWORD}, #{NICKNAME}, #{EMAIL},
+            #{PHONE_NUMBER}, #{BIRTHDATE}, IFNULL(#{ADMIN_CK}, 0),
+            #{SOCIAL_TYPE}, #{SOCIAL_ID} )
+    </insert>
+
+    <select id="getMemberInfo" parameterType="string" resultMap="memResultMap">
+        SELECT * FROM member_tb
+        WHERE member_id = #{id}
+    </select>
+
+    <select id="idCheck" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member_tb 
+        WHERE member_id = #{value}
+    </select>
+    
+    <select id="nicknameCheck" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member_tb 
+        WHERE nickname = #{value}
+    </select>
+    
+    <select id="emailCheck" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member_tb 
+        WHERE email = #{value}
+    </select>
+    
+    <select id="phoneCheck" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member_tb 
+        WHERE phone_number = #{value}
+    </select>
+    
+    <select id="findMemberBySocial" parameterType="java.util.HashMap" resultMap="memResultMap">
+        SELECT * FROM member_tb
+        WHERE social_type = #{socialType} AND social_id = #{socialId}
+    </select>
+
+
+	<select id="findUserByIdAndEmail" resultType="com.boot.login.dto.MemDTO" parameterType="java.util.HashMap">
+    SELECT * FROM   member_tb 
+    WHERE  member_id = #{MEMBER_ID} 
+      AND  email = #{email} 
+</select>
+
+<update id="updatePassword" parameterType="java.util.HashMap">
+    UPDATE member_tb 
+    SET    password = #{PASSWORD} 
+    WHERE  member_id = #{MEMBER_ID}
+</update>
+
+<select id="findUserIdByEmail" parameterType="string" resultMap="memResultMap">
+    SELECT member_id, email, name
+    FROM member_tb 
+    WHERE email = #{email}
+</select>
+</mapper>

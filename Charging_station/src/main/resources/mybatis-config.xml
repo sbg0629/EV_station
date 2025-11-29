@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<mappers>
+		<mapper resource="mybatis/mappers/MemMapper.xml"/>
+		<mapper resource="mybatis/mappers/MyPageMapper.xml"/>
+		<mapper resource="mybatis/mappers/elec.xml"/>
+		<mapper resource="mybatis/mappers/NoticeMapper.xml"/>
+		<mapper resource="mybatis/mappers/Favorite.xml"/>
+		<mapper resource="mybatis/mappers/BoardMapper.xml"/>
+		<mapper resource="mybatis/mappers/BoardCommentMapper.xml"/>
+		<mapper resource="mybatis/mappers/EvLoadMapper.xml"/>		
+		<mapper resource="mybatis/mappers/ReservationMapper.xml"/>
+		<mapper resource="mybatis/mappers/PaymentMapper.xml"/>
+		<mapper resource="mybatis/mappers/FixMapper.xml"/>
+	</mappers>
+</configuration>
+
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<!--<!DOCTYPE configuration-->
+<!--  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"-->
+<!--  "https://mybatis.org/dtd/mybatis-3-config.dtd">-->
+
+<!--<configuration>-->
+<!--    <mappers>-->
+<!--        <mapper resource="mybatis/mappers/MemMapper.xml"/>-->
+<!--        <mapper resource="mybatis/mappers/MyPageMapper.xml"/>-->
+<!--    </mappers>-->
+<!--</configuration>-->

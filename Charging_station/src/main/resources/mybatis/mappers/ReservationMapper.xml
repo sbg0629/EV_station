@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.Reservation.dao.ReservationDAO">
+
+    <resultMap id="reservationResultMap" type="com.boot.Reservation.dto.ReservationDTO">
+        <id property="reservationId" column="reservation_id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="stationRowId" column="station_row_id"/>
+        <result property="reservationStart" column="reservation_start"/>
+        <result property="reservationEnd" column="reservation_end"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="orderId" column="order_id"/>
+        <result property="paymentKey" column="payment_key"/>
+        <result property="stationName" column="station_name"/>
+        <result property="stationAddress" column="station_address"/>
+        <result property="chargerType" column="charger_type"/>
+    </resultMap>
+
+    <insert id="insertReservation" parameterType="com.boot.Reservation.dto.ReservationDTO">
+        INSERT INTO reservation_tb (
+            member_id,
+            station_row_id,
+            reservation_start,
+            reservation_end,
+            status,
+            order_id
+            <if test="chargerType != null and chargerType != ''">
+            , charger_type
+            </if>
+        ) VALUES (
+            #{memberId},
+            #{stationRowId},
+            #{reservationStart, jdbcType=TIMESTAMP},
+            #{reservationEnd, jdbcType=TIMESTAMP},
+            'RESERVED',
+            #{orderId}
+            <if test="chargerType != null and chargerType != ''">
+            , #{chargerType}
+            </if>
+        )
+    </insert>
+
+    <select id="selectReservationsByMemberId"
+            parameterType="string"
+            resultMap="reservationResultMap">
+        SELECT
+            r.reservation_id,
+            r.member_id,
+            r.station_row_id,
+            r.reservation_start,
+            r.reservation_end,
+            r.status,
+            r.created_at,
+            r.updated_at,
+            r.order_id,
+            p.payment_key,
+            cs.station_name,
+            cs.address AS station_address,
+            COALESCE(r.charger_type, '미지정') AS charger_type
+        FROM reservation_tb r
+        LEFT JOIN payment p ON r.order_id = p.order_id
+        LEFT JOIN (
+            SELECT DISTINCT api_stat_id, station_name, address
+            FROM charging_stations
+        ) cs ON r.station_row_id = cs.api_stat_id
+        WHERE r.member_id = #{memberId}
+        ORDER BY r.reservation_start DESC
+    </select>
+
+    <select id="selectReservationsByStationId"
+            parameterType="string"
+            resultMap="reservationResultMap">
+        SELECT
+            reservation_id,
+            member_id,
+            station_row_id,
+            reservation_start,
+            reservation_end,
+            status,
+            created_at,
+            updated_at,
+            charger_type
+      FROM reservation_tb
+        WHERE station_row_id = #{stationRowId}
+          AND status = 'RESERVED'
+        ORDER BY reservation_start ASC
+    </select>
+
+    <update id="updateReservationStatusToCancelled">
+        UPDATE reservation_tb
+        SET status = 'CANCELLED',
+            updated_at = NOW()
+        WHERE reservation_id = #{reservationId}
+          AND member_id = #{memberId}
+          AND status = 'RESERVED'
+    </update>
+
+    <select id="countConflictReservations"
+        parameterType="map"
+        resultType="int">
+        SELECT COUNT(*)
+        FROM reservation_tb
+        WHERE station_row_id = #{stationRowId}
+          AND status = 'RESERVED'
+          AND (
+                #{start, jdbcType=TIMESTAMP} &lt; reservation_end
+            AND #{end, jdbcType=TIMESTAMP} &gt; reservation_start
+          )
+    </select>
+    
+    <select id="countConflictReservationsByType"
+        parameterType="map"
+        resultType="int">
+        SELECT COUNT(*)
+        FROM reservation_tb
+        WHERE station_row_id = #{stationRowId}
+          AND status = 'RESERVED'
+          AND (
+                #{start, jdbcType=TIMESTAMP} &lt; reservation_end
+            AND #{end, jdbcType=TIMESTAMP} &gt; reservation_start
+          )
+          <if test="chargerType != null and chargerType != ''">
+          AND (
+              charger_type = #{chargerType}
+              OR charger_type IS NULL
+              OR charger_type = ''
+          )
+          </if>
+    </select>
+    
+    <select id="getChargerCountByType"
+        parameterType="map"
+        resultType="int">
+        SELECT 
+            <choose>
+                <when test="chargerType != null and (chargerType == '급속' or chargerType == 'FAST' or chargerType == 'fast')">
+                    SUM(CASE WHEN charger_type IN ('01','03','04','05','06','07','09','10') THEN 1 ELSE 0 END)
+                </when>
+                <when test="chargerType != null and (chargerType == '완속' or chargerType == 'SLOW' or chargerType == 'slow')">
+                    SUM(CASE WHEN charger_type IN ('02','08') THEN 1 ELSE 0 END)
+                </when>
+                <otherwise>
+                    COUNT(*)
+                </otherwise>
+            </choose>
+        FROM charging_stations
+        WHERE api_stat_id = #{stationRowId}
+    </select>
+    
+    <!-- 특정 충전소의 특정 시간대에 예약된 충전기 개수 조회 -->
+    <select id="countReservationsByHour"
+        parameterType="map"
+        resultType="int">
+        SELECT COUNT(DISTINCT r.reservation_id)
+        FROM reservation_tb r
+        WHERE r.station_row_id = #{stationRowId}
+          AND r.status = 'RESERVED'
+          AND DATE(r.reservation_start) >= DATE(#{targetDate})
+          AND (
+                (HOUR(r.reservation_start) &lt;= #{hour} AND HOUR(r.reservation_end) &gt; #{hour})
+                OR (HOUR(r.reservation_start) = #{hour})
+                OR (HOUR(r.reservation_end) &gt; #{hour} AND HOUR(r.reservation_start) &lt; #{hour})
+          )
+          <if test="chargerType != null and chargerType != ''">
+          AND (
+              r.charger_type = #{chargerType}
+              OR r.charger_type = CASE 
+                  WHEN #{chargerType} = '급속' THEN 'FAST'
+                  WHEN #{chargerType} = '완속' THEN 'SLOW'
+                  WHEN #{chargerType} = 'fast' OR #{chargerType} = 'FAST' THEN 'FAST'
+                  WHEN #{chargerType} = 'slow' OR #{chargerType} = 'SLOW' THEN 'SLOW'
+                  ELSE NULL
+              END
+              OR r.charger_type IS NULL
+              OR r.charger_type = ''
+          )
+          </if>
+    </select>
+    
+    <!-- 특정 충전소의 특정 날짜의 시간대별 예약 개수 조회 (0~23시) -->
+    <select id="countReservationsByHourRange"
+        parameterType="map"
+        resultType="map">
+        SELECT 
+            h.hour AS hour,
+            COALESCE(COUNT(DISTINCT r.reservation_id), 0) AS reservation_count
+        FROM (
+            SELECT 0 AS hour UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION
+            SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION
+            SELECT 10 UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14 UNION
+            SELECT 15 UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19 UNION
+            SELECT 20 UNION SELECT 21 UNION SELECT 22 UNION SELECT 23
+        ) h
+        LEFT JOIN reservation_tb r ON (
+            r.station_row_id = #{stationRowId}
+            AND r.status = 'RESERVED'
+            AND DATE(r.reservation_start) >= DATE(#{targetDate})
+            AND (
+                (HOUR(r.reservation_start) &lt;= h.hour AND HOUR(r.reservation_end) &gt; h.hour)
+                OR (HOUR(r.reservation_start) = h.hour)
+                OR (HOUR(r.reservation_end) &gt; h.hour AND HOUR(r.reservation_start) &lt; h.hour)
+            )
+            <if test="chargerType != null and chargerType != ''">
+            AND (
+                r.charger_type = #{chargerType}
+                OR r.charger_type IS NULL
+                OR r.charger_type = ''
+            )
+            </if>
+        )
+        GROUP BY h.hour
+        ORDER BY h.hour
+    </select>
+
+</mapper>

@@ -1,0 +1,186 @@
+/* header.css (충돌 수정 및 정리된 최종본) */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 0;
+}
+
+/* --- 1. 내비게이션 바 전체 --- */
+#nav3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    min-height: 60px;
+}
+
+/* --- 2. 로고 --- */
+#nav3 a.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #007bff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+/* --- 3. 메인 메뉴 --- */
+#nav3 ul.main-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+#nav3 ul.main-nav li {
+    margin: 0 15px;
+}
+
+#nav3 ul.main-nav li a {
+    text-decoration: none;
+    color: #333333;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+#nav3 ul.main-nav li a:hover {
+    background-color: #f4f4f4;
+    color: #0056b3;
+}
+
+/* --- 4. 공통 아이콘 --- */
+.nav-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+#nav3 a.logo .nav-icon {
+    width: 30px;
+    height: 30px;
+}
+
+/* --- 5. 사용자 메뉴 (로그인 전/후 공통) --- */
+#nav3 ul.user-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+#nav3 ul.user-nav li {
+    margin-left: 10px;
+}
+
+/* 5-1. (로그인 전) 로그인/회원가입 버튼, (로그인 후) 즐겨찾기 링크, 드롭다운 트리거 */
+#nav3 ul.user-nav li a,
+#nav3 ul.user-nav li button {
+    text-decoration: none;
+    color: #333333;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+#nav3 ul.user-nav li a:hover,
+#nav3 ul.user-nav li button:hover {
+    background-color: #f4f4f4;
+}
+
+/* --- 6. 드롭다운 메뉴 스타일 --- */
+
+/* 6-1. 드롭다운 컨테이너 (li) */
+.user-dropdown-container {
+    position: relative;
+}
+
+/* 6-2. 드롭다운 클릭 버튼 (환영메시지 + 화살표) */
+#nav3 ul.user-nav li .user-menu-trigger {
+    gap: 8px;
+    font-weight: bold;
+}
+
+#nav3 ul.user-nav li .user-menu-trigger .fa-chevron-down {
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+}
+
+/* 6-3. 드롭다운 메뉴 (숨겨진 박스) */
+.user-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 120%;
+    right: 0;
+    min-width: 180px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #eee;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+/* JS가 .show 클래스를 추가했을 때 */
+.user-dropdown-menu.show {
+    display: block;
+}
+
+/* 6-4. 드롭다운 내부 항목 (ul, li) */
+.user-dropdown-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 5px;
+}
+
+.user-dropdown-menu ul li {
+    margin: 0;
+}
+
+/* 6-5. [통일 스타일] 드롭다운 내부 링크(a) 및 버튼(form button) */
+.user-dropdown-menu ul li a,
+.user-dropdown-menu ul li form button {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+    background-color: transparent;
+    border: none;
+    border-radius: 6px;
+    text-align: left;
+    box-sizing: border-box;
+    white-space: nowrap;
+    cursor: pointer; /* 버튼이 아닌 척하는 a 태그에도 커서 적용 */
+}
+
+.user-dropdown-menu ul li form {
+    margin: 0;
+}
+
+/* [통일 스타일] 호버 효과 */
+.user-dropdown-menu ul li a:hover,
+.user-dropdown-menu ul li form button:hover {
+    background-color: #f4f4f4;
+}

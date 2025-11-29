@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.boot.Main_Page.dao.EvLoadMapper">
+
+    <insert id="saveAllStations" parameterType="java.util.List">
+        INSERT INTO charging_stations (
+            api_stat_id, charger_id, station_name, 
+            address, 
+            city, district,
+            latitude, longitude,
+            use_time, busi_call, operator, parking_free, note,
+            
+            -- [추가 1] 시설 구분 컬럼
+            facility_type_large, 
+            facility_type_small,
+            
+            charger_type, output, method,
+            stat, stat_updated_at, last_start_dt, last_end_dt, now_start_dt,
+            last_synced_at
+        ) VALUES 
+        <foreach collection="list" item="item" separator=",">
+        (
+            #{item.statId}, #{item.chgerId}, #{item.statNm}, 
+            #{item.addr}, 
+            SUBSTRING_INDEX(#{item.addr}, ' ', 1), 
+            SUBSTRING_INDEX(SUBSTRING_INDEX(#{item.addr}, ' ', 2), ' ', -1),
+            
+            #{item.lat}, #{item.lng},
+            #{item.useTime}, #{item.busiCall}, #{item.busiNm}, #{item.parkingFree}, #{item.note},
+
+            -- [추가 2] kind 코드를 한글로 변환하여 facility_type_large에 저장
+            CASE #{item.kind}
+                WHEN 'A0' THEN '공공시설'
+                WHEN 'B0' THEN '주차시설'
+                WHEN 'C0' THEN '휴게시설'
+                WHEN 'D0' THEN '관광시설'
+                WHEN 'E0' THEN '상업시설'
+                WHEN 'F0' THEN '차량정비시설'
+                WHEN 'G0' THEN '근린생활시설'
+                WHEN 'H0' THEN '공동주택'
+                WHEN 'I0' THEN '기타'
+                WHEN 'J0' THEN '교육문화시설'
+                ELSE '기타'
+            END,
+            
+            -- [추가 3] kindDetail을 facility_type_small에 저장
+            #{item.kindDetail},
+
+            #{item.chgerType}, #{item.output}, #{item.method},
+            #{item.stat}, #{item.statUpdDt}, #{item.lastTsdt}, #{item.lastTedt}, #{item.nowTsdt},
+            NOW()
+        )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+            station_name = VALUES(station_name),
+            address = VALUES(address),
+            city = VALUES(city),
+            district = VALUES(district),
+            
+            -- [추가 4] 이미 데이터가 있어도 시설 정보 업데이트
+            facility_type_large = VALUES(facility_type_large),
+            facility_type_small = VALUES(facility_type_small),
+            
+            stat = VALUES(stat),
+            stat_updated_at = VALUES(stat_updated_at),
+            last_start_dt = VALUES(last_start_dt),
+            last_end_dt = VALUES(last_end_dt),
+            now_start_dt = VALUES(now_start_dt),
+            last_synced_at = NOW()
+    </insert>
+
+    <update id="updateStationStatus" parameterType="com.boot.Main_Page.dto.EvApiDto$Item">
+        UPDATE charging_stations
+        SET 
+            stat = #{stat},
+            stat_updated_at = #{statUpdDt},
+            last_start_dt = #{lastTsdt},
+            last_end_dt = #{lastTedt},
+            now_start_dt = #{nowTsdt},
+            last_synced_at = NOW()
+        WHERE 
+            api_stat_id = #{statId} 
+            AND charger_id = #{chgerId}
+    </update>
+    
+    <select id="getDbCount" resultType="int">
+        SELECT COUNT(*) FROM charging_stations
+    </select>
+
+</mapper>

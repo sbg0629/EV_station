@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.Main_Page.dao.ElecDAO">
+
+    <resultMap id="elecResultMap" type="com.boot.Main_Page.dto.ElecDTO">
+        <result property="apiStatId" column="api_stat_id"/>
+        <result property="id" column="id"/>
+        <result property="stationName" column="station_name"/>
+        <result property="address" column="address"/>
+        <result property="city" column="city"/>
+        <result property="district" column="district"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="distanceM" column="distance_m"/>
+        <result property="lastUpdated" column="last_updated"/>
+        <result property="facilityTypeLarge" column="facility_type_large"/>
+        
+        <result property="operator" column="operator"/>
+        <result property="busiCall" column="busi_call"/>
+        <result property="useTime" column="use_time"/>
+        <result property="parkingFree" column="parking_free"/>
+        <result property="note" column="note"/>
+        
+        <result property="chargerCount" column="charger_count"/>
+        <result property="availableChargerCount" column="available_charger_count"/>
+        <result property="fastChargerCount" column="fast_charger_count"/>
+        <result property="slowChargerCount" column="slow_charger_count"/>
+        
+        <result property="countType01" column="cnt_01"/>
+        <result property="countType02" column="cnt_02"/>
+        <result property="countType03" column="cnt_03"/>
+        <result property="countType04" column="cnt_04"/>
+        <result property="countType05" column="cnt_05"/>
+        <result property="countType06" column="cnt_06"/>
+        <result property="countType07" column="cnt_07"/>
+        <result property="countType08" column="cnt_08"/>
+        <result property="countType09" column="cnt_09"/>
+        <result property="countType10" column="cnt_10"/>
+    </resultMap>
+
+    <sql id="selectStationGrouped">
+        SELECT
+            api_stat_id,
+            station_name, address, latitude, longitude, city, district,
+            MIN(id) AS id,
+            MIN(operator) AS operator,
+            MIN(busi_call) AS busi_call,
+            MIN(use_time) AS use_time,
+            MIN(parking_free) AS parking_free,
+            MIN(note) AS note,
+            MIN(facility_type_large) AS facility_type_large,
+            DATE_FORMAT(MAX(last_synced_at), '%Y-%m-%d %H:%i:%s') AS last_updated,
+            GROUP_CONCAT(DISTINCT output SEPARATOR ', ') AS fast_charge_capacity,
+            
+            -- 전체 개수
+            COUNT(*) AS charger_count,
+            
+            -- 사용 가능 개수
+            SUM(CASE WHEN stat = 2 THEN 1 ELSE 0 END) AS available_charger_count,
+
+            -- [급속 합계] (02, 08 제외한 모든 코드)
+            SUM(CASE WHEN charger_type IN ('01','03','04','05','06','07','09','10') THEN 1 ELSE 0 END) AS fast_charger_count,
+
+            -- [완속 합계] (02, 08)
+            SUM(CASE WHEN charger_type IN ('02','08') THEN 1 ELSE 0 END) AS slow_charger_count,
+            
+            -- [타입별 상세 카운트]
+            SUM(CASE WHEN charger_type = '01' THEN 1 ELSE 0 END) AS cnt_01,
+            SUM(CASE WHEN charger_type = '02' THEN 1 ELSE 0 END) AS cnt_02,
+            SUM(CASE WHEN charger_type = '03' THEN 1 ELSE 0 END) AS cnt_03,
+            SUM(CASE WHEN charger_type = '04' THEN 1 ELSE 0 END) AS cnt_04,
+            SUM(CASE WHEN charger_type = '05' THEN 1 ELSE 0 END) AS cnt_05,
+            SUM(CASE WHEN charger_type = '06' THEN 1 ELSE 0 END) AS cnt_06,
+            SUM(CASE WHEN charger_type = '07' THEN 1 ELSE 0 END) AS cnt_07,
+            SUM(CASE WHEN charger_type = '08' THEN 1 ELSE 0 END) AS cnt_08,
+            SUM(CASE WHEN charger_type = '09' THEN 1 ELSE 0 END) AS cnt_09,
+            SUM(CASE WHEN charger_type = '10' THEN 1 ELSE 0 END) AS cnt_10
+            
+            
+    </sql>
+
+    <select id="searchByRadius" parameterType="map" resultMap="elecResultMap">
+        SELECT * FROM (
+            SELECT *,
+                (6371000 * ACOS(COS(RADIANS(#{targetLat})) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(#{targetLng})) + 
+                SIN(RADIANS(#{targetLat})) * SIN(RADIANS(latitude)))) AS distance_m
+            FROM (
+                <include refid="selectStationGrouped"/>
+                FROM charging_stations
+                GROUP BY api_stat_id, station_name, address, latitude, longitude, city, district
+            ) AS GroupedTable
+        ) AS ResultTable
+        WHERE distance_m &lt;= #{radius}
+        ORDER BY distance_m
+    </select>
+
+    <select id="searchByKeyword" parameterType="map" resultMap="elecResultMap">
+        <include refid="selectStationGrouped"/>
+        FROM charging_stations
+        WHERE
+            station_name LIKE CONCAT('%', #{keyword}, '%')
+            OR address LIKE CONCAT('%', #{keyword}, '%')
+        GROUP BY api_stat_id, station_name, address, latitude, longitude, city, district
+        LIMIT 50
+    </select>
+    
+    <select id="searchByBounds" parameterType="map" resultMap="elecResultMap">
+        <include refid="selectStationGrouped"/>
+        FROM charging_stations
+        WHERE
+            latitude BETWEEN #{minLat} AND #{maxLat}
+            AND longitude BETWEEN #{minLng} AND #{maxLng}
+        GROUP BY api_stat_id, station_name, address, latitude, longitude, city, district
+    </select>
+    
+    <select id="getChargerList" parameterType="string" resultType="com.boot.Main_Page.dto.ChargerInfoDTO">
+        SELECT 
+            charger_id AS chargerId,
+            charger_type AS chargerType,
+            stat,
+            output,
+            method,
+            -- 상태 변경 시간 (YYYY-MM-DD HH:mm:ss 포맷)
+            DATE_FORMAT(stat_updated_at, '%Y-%m-%d %H:%i:%s') AS statUpdDt,
+            
+            -- 🌟 [추가] 방금 동기화된 시간 (시:분:초 만 표시)
+            DATE_FORMAT(last_synced_at, '%H:%i:%s') AS lastSyncedAt,
+            
+            CASE charger_type
+                WHEN '01' THEN 'DC차데모'
+                WHEN '02' THEN 'AC완속'
+                WHEN '03' THEN 'DC차데모+AC3상'
+                WHEN '04' THEN 'DC콤보'
+                WHEN '05' THEN 'DC차데모+DC콤보'
+                WHEN '06' THEN 'DC차데모+AC3상+DC콤보'
+                WHEN '07' THEN 'AC3상'
+                WHEN '08' THEN 'DC콤보(완속)'
+                WHEN '09' THEN 'NACS'
+                WHEN '10' THEN 'DC콤보+NACS'
+                ELSE '기타'
+            END AS typeName
+        FROM charging_stations
+        WHERE api_stat_id = #{apiStatId}
+        ORDER BY charger_id ASC
+    </select>
+    
+    <select id="needsUpdate" parameterType="map" resultType="int">
+        SELECT EXISTS (
+            SELECT 1 FROM charging_stations
+            WHERE api_stat_id = #{apiStatId}
+            AND (
+                last_synced_at IS NULL  OR 
+                last_synced_at &lt; DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE) )
+            LIMIT 1
+        )
+    </select>
+
+</mapper>

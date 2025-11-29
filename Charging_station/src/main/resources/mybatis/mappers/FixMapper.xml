@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="FixMapper">
+
+    <insert id="insertReport" parameterType="com.boot.fix.dto.FixDTO" useGeneratedKeys="true" keyProperty="reportId" keyColumn="report_id">
+        INSERT INTO ev_malfunction_report_tb (
+            member_id, api_stat_id, charger_id, malfunction_type, detail_content, image_url, status, reported_at
+        ) VALUES (
+            #{memberId}, #{apiStatId}, #{chargerId}, #{malfunctionType}, #{detailContent}, #{imageUrl}, #{status}, NOW()
+        )
+    </insert>
+
+    <select id="getAllReports" resultType="com.boot.fix.dto.FixDTO">
+        SELECT
+            report_id AS reportId, 
+            member_id AS memberId, 
+            api_stat_id AS apiStatId, 
+            charger_id AS chargerId, 
+            malfunction_type AS malfunctionType,
+            detail_content AS detailContent, 
+            image_url AS imageUrl, 
+            status, 
+            admin_comment AS adminComment, 
+            reported_at AS reportedAt, 
+            processed_at AS processedAt
+        FROM ev_malfunction_report_tb
+        ORDER BY reported_at DESC
+    </select>
+
+    <select id="getReportById" parameterType="long" resultType="com.boot.fix.dto.FixDTO">
+        SELECT
+            report_id AS reportId, 
+            member_id AS memberId, 
+            api_stat_id AS apiStatId, 
+            charger_id AS chargerId, 
+            malfunction_type AS malfunctionType,
+            detail_content AS detailContent, 
+            image_url AS imageUrl, 
+            status, 
+            admin_comment AS adminComment, 
+            reported_at AS reportedAt, 
+            processed_at AS processedAt
+        FROM ev_malfunction_report_tb
+        WHERE report_id = #{reportId}
+    </select>
+
+    <update id="updateReport" parameterType="com.boot.fix.dto.FixDTO">
+        UPDATE ev_malfunction_report_tb
+        SET
+            malfunction_type = #{malfunctionType},
+            detail_content = #{detailContent},
+            image_url = #{imageUrl},
+            status = #{status},
+            admin_comment = #{adminComment},
+            processed_at = #{processedAt}
+        WHERE report_id = #{reportId}
+    </update>
+
+    <delete id="deleteReport" parameterType="long">
+        DELETE FROM ev_malfunction_report_tb
+        WHERE report_id = #{reportId}
+    </delete>
+
+    <select id="getReportsByMemberId" parameterType="string" resultType="com.boot.fix.dto.FixDTO">
+        SELECT
+            report_id AS reportId, 
+            member_id AS memberId, 
+            api_stat_id AS apiStatId, 
+            charger_id AS chargerId, 
+            malfunction_type AS malfunctionType,
+            detail_content AS detailContent, 
+            image_url AS imageUrl, 
+            status, 
+            admin_comment AS adminComment, 
+            reported_at AS reportedAt, 
+            processed_at AS processedAt
+        FROM ev_malfunction_report_tb
+        WHERE member_id = #{memberId}
+        ORDER BY reported_at DESC
+    </select>
+
+    <!-- 전체 고장 신고 개수 -->
+    <select id="getTotalCount" resultType="int">
+        SELECT COUNT(*)
+        FROM ev_malfunction_report_tb
+    </select>
+
+    <!-- 전체 고장 신고 페이징 -->
+    <select id="getAllReportsWithPaging" parameterType="map" resultType="com.boot.fix.dto.FixDTO">
+        SELECT
+            report_id AS reportId, 
+            member_id AS memberId, 
+            api_stat_id AS apiStatId, 
+            charger_id AS chargerId, 
+            malfunction_type AS malfunctionType,
+            detail_content AS detailContent, 
+            image_url AS imageUrl, 
+            status, 
+            admin_comment AS adminComment, 
+            reported_at AS reportedAt, 
+            processed_at AS processedAt
+        FROM ev_malfunction_report_tb
+        ORDER BY reported_at DESC
+        LIMIT #{startRow}, #{pageSize}
+    </select>
+
+</mapper>

@@ -1,0 +1,56 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.13' // Spring Boot 버전 2.7.13 사용
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.boot'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	 // MyBatis 및 DB 커넥터
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.3.1'
+    implementation 'org.springframework.boot:spring-boot-starter-mail' //이메일 인증 의존성
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    // ⭐ JSP 사용을 위한 필수 의존성 (문제 해결을 위해 남겨야 함)
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation 'javax.servlet:jstl:1.2'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    // 파일 업로드 및 이미지 처리
+    implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.20'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    //redis 캐싱처리
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.5'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.security:spring-security-core:5.7.7'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

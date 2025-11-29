@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.Main_Page.dao.FavoriteDAO">
+
+    <select id="checkFavorite" parameterType="hashmap" resultType="int">
+        SELECT COUNT(*)
+        FROM ev_favorite_tb
+        WHERE member_id = #{memberId} AND station_id = #{stationId}
+    </select>
+
+    <insert id="addFavorite" parameterType="hashmap">
+        INSERT INTO ev_favorite_tb (member_id, station_id)
+        VALUES (#{memberId}, #{stationId})
+    </insert>
+    
+    <delete id="deleteFavorite" parameterType="hashmap">
+        DELETE FROM ev_favorite_tb
+        WHERE member_id = #{memberId} AND station_id = #{stationId}
+    </delete>
+
+    <select id="getFavoriteStations" parameterType="string" 
+        resultMap="com.boot.Main_Page.dao.ElecDAO.elecResultMap"> 
+	    SELECT
+	        cs_all.station_name, 
+	        cs_all.address, 
+	        cs_all.latitude, 
+	        cs_all.longitude, 
+	        cs_all.city, 
+	        cs_all.district,
+	        
+	        -- MIN() 함수를 사용하여 상세 정보 필드를 채움
+	        MIN(cs_all.id) AS id, 
+	        MIN(cs_all.installation_year) AS installation_year,
+	        MIN(cs_all.facility_type_large) AS facility_type_large, 
+	        MIN(cs_all.facility_type_small) AS facility_type_small,  
+	        MIN(cs_all.charger_model_large) AS charger_model_large,  
+	        MIN(cs_all.operator_large) AS operator_large, 
+	        MIN(cs_all.operator_small) AS operator_small,             
+	        MIN(cs_all.user_restriction) AS user_restriction,
+	        
+	        -- 충전기 정보 집계 (GROUP_CONCAT)
+	        GROUP_CONCAT(DISTINCT cs_all.charger_model_small SEPARATOR ', ') AS charger_model_small,
+	        GROUP_CONCAT(DISTINCT cs_all.fast_charge_capacity SEPARATOR ', ') AS fast_charge_capacity,
+	        
+	        -- 충전기 개수 집계 (COUNT, SUM)
+	        COUNT(*) AS charger_count,
+	
+	        SUM(CASE 
+	            WHEN cs_all.charger_type IN (
+	                'DC콤보', 
+	                'DC차데모', 
+	                'DC차데모+AC3상+DC콤BO', 
+	                'DC차데모+DC콤보', 
+	                'DC차데모+AC3상'
+	            ) THEN 1 
+	            ELSE 0 
+	        END) AS fast_charger_count,
+	        
+	        SUM(CASE 
+	            WHEN cs_all.charger_type IN (
+	                'AC3상', 
+	                'AC완속', 
+	                'DC콤보(완속)'
+	            ) THEN 1 
+	            ELSE 0 
+	        END) AS slow_charger_count
+	        
+	    FROM charging_stations cs_all 
+	    JOIN (
+	        SELECT DISTINCT
+	            cs.station_name, cs.address, cs.latitude, cs.longitude
+	        FROM ev_favorite_tb fav
+	        JOIN charging_stations cs ON fav.station_id = cs.id
+	        WHERE fav.member_id = #{memberId}
+	    ) AS FavoritedStationInfo ON 
+	        cs_all.station_name = FavoritedStationInfo.station_name AND
+	        cs_all.address = FavoritedStationInfo.address AND
+	        cs_all.latitude = FavoritedStationInfo.latitude AND
+	        cs_all.longitude = FavoritedStationInfo.longitude
+	
+	    GROUP BY 
+	        cs_all.station_name, cs_all.address, cs_all.latitude, cs_all.longitude, cs_all.city, cs_all.district
+	    ORDER BY 
+	        cs_all.station_name
+	</select>
+
+</mapper>

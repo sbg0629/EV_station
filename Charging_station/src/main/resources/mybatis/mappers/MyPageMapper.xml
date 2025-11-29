@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.MY_Page.dao.MyPageDAO">
+
+    <resultMap id="memResultMap" type="com.boot.MY_Page.dto.MyPageDTO">
+        <result property="memberId"     column="member_id"/>
+        <result property="name"         column="name"/>
+        <result property="password"     column="password"/>
+        <result property="nickname"     column="nickname"/>
+        <result property="email"        column="email"/>
+        <result property="phoneNumber"  column="phone_number"/>
+        <result property="birthdate"    column="birthdate"/>
+        <result property="joinDate"     column="join_date"/>
+        <result property="adminck"      column="admin_ck"/>
+        <result property="socialType"   column="social_type"/>
+        <result property="socialId"     column="social_id"/>
+    </resultMap>
+
+    <select id="list" resultMap="memResultMap">
+        SELECT member_id, name, password, nickname, email, phone_number, birthdate, join_date, admin_ck, social_type, social_id
+        FROM member_tb
+        WHERE admin_ck != 1
+        ORDER BY member_id
+    </select>
+
+    <select id="getUserById" parameterType="string" resultMap="memResultMap">
+        SELECT member_id, name, password, nickname, email, phone_number, birthdate, join_date, admin_ck, social_type, social_id
+        FROM member_tb
+        WHERE member_id = #{memberId}
+    </select>
+
+    <update id="modify" parameterType="hashmap">
+        UPDATE member_tb 
+        SET 
+            name = #{name}, 
+            nickname = #{nickname}, 
+            password = #{password}, 
+            email = #{email},
+            phone_number = #{phoneNumber}, 
+            birthdate = STR_TO_DATE(#{birthdate}, '%Y-%m-%d')
+        WHERE 
+            member_id = #{memberId}
+    </update>
+
+    <delete id="delete" parameterType="hashmap">
+        DELETE FROM member_tb 
+        WHERE member_id = #{memberId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.boot.Notice.dao.NoticeDAO">
+    
+    <resultMap id="noticeResultMap" type="com.boot.Notice.dto.NoticeDTO">
+        <result property="noticeId" column="notice_id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="category" column="category"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="isFixed" column="is_fixed"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="memberName" column="member_name"/>
+    </resultMap>
+    
+    
+    <!-- 공지사항 목록 조회 (전체) -->
+    <select id="list" resultMap="noticeResultMap">
+        SELECT 
+            n.notice_id, n.member_id, n.category, n.title, n.content,
+            n.view_count, n.is_fixed, n.created_at, n.updated_at,
+            m.name AS member_name
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        ORDER BY n.is_fixed DESC, n.created_at DESC
+    </select>
+    
+    <!-- 공지사항 목록 조회 (카테고리별) -->
+    <select id="listByCategory" parameterType="string" resultMap="noticeResultMap">
+        SELECT 
+            n.notice_id, n.member_id, n.category, n.title, n.content,
+            n.view_count, n.is_fixed, n.created_at, n.updated_at,
+            m.name AS member_name
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        WHERE n.category = #{category}
+        ORDER BY n.is_fixed DESC, n.created_at DESC
+    </select>
+    
+    <!-- 공지사항 검색 -->
+    <select id="search" parameterType="java.util.HashMap" resultMap="noticeResultMap">
+        SELECT 
+            n.notice_id, n.member_id, n.category, n.title, n.content,
+            n.view_count, n.is_fixed, n.created_at, n.updated_at,
+            m.name AS member_name
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        WHERE n.title LIKE CONCAT('%', #{keyword}, '%')
+           OR n.content LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY n.is_fixed DESC, n.created_at DESC
+    </select>
+    
+    <!-- 공지사항 개수 조회 (검색 포함) -->
+    <select id="getNoticeCount" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        <where>
+            <if test="category != null and category != ''">
+                AND n.category = #{category}
+            </if>
+            <if test="keyword != null and keyword != '' and type != null and type != ''">
+                AND (
+                    <trim prefixOverrides="OR">
+                        <if test="type.contains('T')">
+                            OR n.title LIKE CONCAT('%', #{keyword}, '%')
+                        </if>
+                        <if test="type.contains('C')">
+                            OR n.content LIKE CONCAT('%', #{keyword}, '%')
+                        </if>
+                    </trim>
+                )
+            </if>
+        </where>
+    </select>
+    
+    <!-- 페이징 공지사항 목록 -->
+    <select id="listPaged" parameterType="map" resultMap="noticeResultMap">
+        SELECT 
+            n.notice_id, n.member_id, n.category, n.title, n.content,
+            n.view_count, n.is_fixed, n.created_at, n.updated_at,
+            m.name AS member_name
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        
+        <where>
+            <if test="category != null and category != ''">
+                AND n.category = #{category}
+            </if>
+            <if test="keyword != null and keyword != '' and type != null and type != ''">
+                AND (
+                    <trim prefixOverrides="OR">
+                        <if test="type.contains('T')">
+                            OR n.title LIKE CONCAT('%', #{keyword}, '%')
+                        </if>
+                        <if test="type.contains('C')">
+                            OR n.content LIKE CONCAT('%', #{keyword}, '%')
+                        </if>
+                    </trim>
+                )
+            </if>
+        </where>
+        
+        ORDER BY n.is_fixed DESC, n.created_at DESC
+        LIMIT #{startRow}, #{pageSize}
+    </select>
+    
+    <!-- 공지사항 상세 조회 -->
+    <select id="getNotice" parameterType="int" resultMap="noticeResultMap">
+        SELECT 
+            n.notice_id, n.member_id, n.category, n.title, n.content,
+            n.view_count, n.is_fixed, n.created_at, n.updated_at,
+            m.name AS member_name
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        WHERE n.notice_id = #{noticeId}
+    </select>
+    
+    <!-- 공지사항 작성 -->
+    <insert id="write" parameterType="java.util.HashMap">
+        INSERT INTO notice_tb (
+            member_id, category, title, content, is_fixed
+        ) VALUES (
+            #{member_id}, #{category}, #{title}, #{content}, 
+            IFNULL(#{is_fixed}, 0)
+        )
+    </insert>
+    
+    <!-- 공지사항 수정 -->
+    <update id="modify" parameterType="java.util.HashMap">
+        UPDATE notice_tb
+        SET 
+            category = #{category},
+            title = #{title},
+            content = #{content},
+            is_fixed = IFNULL(#{is_fixed}, is_fixed),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE notice_id = #{notice_id}
+    </update>
+    
+    <!-- 공지사항 삭제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM notice_tb
+        WHERE notice_id = #{noticeId}
+    </delete>
+    
+    <!-- 조회수 증가 -->
+    <update id="increaseViewCount" parameterType="int">
+        UPDATE notice_tb
+        SET view_count = view_count + 1
+        WHERE notice_id = #{noticeId}
+    </update>
+    
+    <!-- 고정 공지사항 조회 -->
+    <select id="getFixedNotices" resultMap="noticeResultMap">
+        SELECT 
+            n.notice_id, n.member_id, n.category, n.title, n.content,
+            n.view_count, n.is_fixed, n.created_at, n.updated_at,
+            m.name AS member_name
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        WHERE n.is_fixed = 1
+        ORDER BY n.created_at DESC
+        LIMIT 5
+    </select>
+    
+    <!-- 전체 공지사항 개수 -->
+    <select id="getTotalCount" resultType="int">
+        SELECT COUNT(*)
+        FROM notice_tb
+    </select>
+    
+    <!-- 카테고리별 공지사항 개수 -->
+    <select id="getCategoryCount" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM notice_tb
+        WHERE category = #{category}
+    </select>
+    
+    <!-- 검색 결과 개수 -->
+    <select id="getSearchCount" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (n.title LIKE CONCAT('%', #{keyword}, '%')
+                OR n.content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+    
+    <!-- 전체 공지사항 페이징 -->
+    <select id="listWithPaging" parameterType="map" resultMap="noticeResultMap">
+        SELECT 
+            n.notice_id, n.member_id, n.category, n.title, n.content,
+            n.view_count, n.is_fixed, n.created_at, n.updated_at,
+            m.name AS member_name
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        ORDER BY n.is_fixed DESC, n.created_at DESC
+        LIMIT #{startRow}, #{pageSize}
+    </select>
+    
+    <!-- 카테고리별 공지사항 페이징 -->
+    <select id="listByCategoryWithPaging" parameterType="map" resultMap="noticeResultMap">
+        SELECT 
+            n.notice_id, n.member_id, n.category, n.title, n.content,
+            n.view_count, n.is_fixed, n.created_at, n.updated_at,
+            m.name AS member_name
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        WHERE n.category = #{category}
+        ORDER BY n.is_fixed DESC, n.created_at DESC
+        LIMIT #{startRow}, #{pageSize}
+    </select>
+    
+    <!-- 검색 공지사항 페이징 -->
+    <select id="searchWithPaging" parameterType="map" resultMap="noticeResultMap">
+        SELECT 
+            n.notice_id, n.member_id, n.category, n.title, n.content,
+            n.view_count, n.is_fixed, n.created_at, n.updated_at,
+            m.name AS member_name
+        FROM notice_tb n
+        LEFT JOIN member_tb m ON n.member_id = m.member_id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (n.title LIKE CONCAT('%', #{keyword}, '%')
+                OR n.content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY n.is_fixed DESC, n.created_at DESC
+        LIMIT #{startRow}, #{pageSize}
+    </select>
+</mapper>
