@@ -1,8 +1,9 @@
 # ⚡ EV Station — 전기차 충전소 정보 & 실시간 예약/고장신고 플랫폼
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/3f5231f5-e368-4875-9b5e-bcb8ff08f52e" alt="EV Station Project Banner" />
+  <img src="https://github.com/user-attachments/assets/328961d9-b838-410d-801d-c171ee94bcd0" alt="EV Station Project Banner" />
 </p>
+
 
 ## 📌 프로젝트 소개
 **EV Station**은 실시간 전기차 충전소 정보, 예약, 결제, 고장 신고 등  
@@ -26,38 +27,39 @@ Spring, JSP, Oracle DB, MyBatis, Spring Security 등 최신 기술과 공공데�
 ## 📸 서비스 화면 예시
 
 <!-- 1 -->
-### 🔐 로그인 / 🧾 메인
+### 🔐 로그인 / 🧾 회원가입
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f7193ac1-6d4f-4f84-9dc9-e1f67d233842" width="47%" />
-  <img src="https://github.com/user-attachments/assets/e28d85b0-2158-4f78-8869-3a88241671b7" width="47%" />
+  <img src="https://github.com/user-attachments/assets/305dc810-6546-4b67-b403-b15eb5d3e120" width="47%" />
+  <img src="https://github.com/user-attachments/assets/90d3a052-07a2-495f-82f5-eb90cdf1168e" width="47%" />
 </p>
 
 <!-- 2 -->
 ### ⚡ 충전소 지도 / 혼잡도 예측
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/75b13823-3b4b-47cf-b6b5-bcd884ed7705" width="47%" />
-  <img src="https://github.com/user-attachments/assets/a608aaad-3331-47f4-9e9e-d42bd2b11d65" width="47%" />
+  <img src="https://github.com/user-attachments/assets/e9e539c8-5d5d-47ef-b561-c6b8e32215f1" width="47%" />
+  <img src="" width="47%" />
 </p>
+
 
 <!-- 3 -->
 ### 🛠 고장신고 / 관리자 고장처리
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/52f4a590-475f-40e8-92b2-6d4a841f3f20" width="47%" />
-  <img src="https://github.com/user-attachments/assets/1d43cb23-df41-4dda-a2f3-f7adbf9a04bc" width="47%" />
+  <img src="https://github.com/user-attachments/assets/61e75082-d0f4-4c17-9fcd-16fbbc52f89a" width="47%" />
+  <img src="https://github.com/user-attachments/assets/da23acb3-0335-47c6-a022-182a8a923cc3" width="47%" />
 </p>
 
 <!-- 4 -->
 ### 📢 공지사항 / 자유게시판
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/b1603884-e6ef-4af8-9f92-0b7292793e69" width="47%" />
-  <img src="https://github.com/user-attachments/assets/fdd8a51f-6b18-4134-8bc3-c04dd7ae5da1" width="47%" />
+  <img src="https://github.com/user-attachments/assets/56ea9b5c-9e2c-4dae-9eed-633dfb8eac61" width="47%" />
+  <img src="https://github.com/user-attachments/assets/cca601d6-b109-4a06-94ed-b90c4a7c3706" width="47%" />
 </p>
 
 <!-- 5 -->
 ### 💳 예약 결제 / 결제 성공·실패 안내
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/0535efa8-5177-4df5-b391-fcde6d0c22a4" width="47%" />
-  <img src="https://github.com/user-attachments/assets/3ab112f6-6d08-4837-b0ca-eb1bca8f1fb2" width="47%" />
+  <img src="https://github.com/user-attachments/assets/e0f450e5-937a-435b-a47e-69e63e8c48bd" width="47%" />
+  <img src="https://github.com/user-attachments/assets/d8c274cc-74f1-47a9-bf54-ea16b38c7700" width="47%" />
 </p>
 
 <!-- 6 -->
@@ -70,8 +72,8 @@ Spring, JSP, Oracle DB, MyBatis, Spring Security 등 최신 기술과 공공데�
 <!-- 7 -->
 ### 👤 마이페이지 / 관리자 회원관리
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/16673cd2-7173-4dc2-ace4-789d2cc05088" width="47%" />
-  <img src="https://github.com/user-attachments/assets/50fb4226-1330-4bbf-be35-2e121e33e345" width="47%" />
+  <img src="https://github.com/user-attachments/assets/8c9e4469-43c5-4df4-9475-a9d9c3d0fb54" width="47%" />
+  <img src="https://github.com/user-attachments/assets/1f9b3dd5-9179-4d13-8854-d83097329722" width="47%" />
 </p>
 
 <!-- 8 -->
@@ -80,6 +82,7 @@ Spring, JSP, Oracle DB, MyBatis, Spring Security 등 최신 기술과 공공데�
   <img src="https://github.com/user-attachments/assets/5a9bb62a-e41e-4022-9e26-2aed53107415" width="47%" />
   <img src="https://github.com/user-attachments/assets/8f9a8e66-f531-42d9-b3a7-a57229d65ec2" width="47%" />
 </p>
+
 
 ---
 
